@@ -1,6 +1,8 @@
+"use client";
 import React from "react";
-
+import { useRouter } from "next/navigation";
 const Header = () => {
+  const router = useRouter();
   return (
     <header className="bg-white sticky top-0">
       <nav
@@ -31,8 +33,12 @@ const Header = () => {
           </div>
         </div>
         <div className="flex flex-1 justify-end">
-          <a href="#" className="text-lg font-semibold text-gray-900">
-            Log in <span aria-hidden="true">&rarr;</span>
+          <a
+            href="#"
+            className="text-lg font-semibold text-gray-900"
+            onClick={() => router.push("/signin")}
+          >
+            Sign in <span aria-hidden="true">&rarr;</span>
           </a>
         </div>
       </nav>
