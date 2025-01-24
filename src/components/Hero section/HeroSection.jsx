@@ -1,14 +1,17 @@
 "use client";
-import { Button, Modal, Upload } from "antd";
+import { Button, Modal, Upload, message } from "antd";
 import React, { useState } from "react";
 import { InboxOutlined } from "@ant-design/icons";
 import "@ant-design/v5-patch-for-react-19";
+import jsPDF from "jspdf";
 
 const HeroSection = () => {
   const { Dragger } = Upload;
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isResultModalVisible, setIsResultModalVisible] = useState(false);
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [resultData, setResultData] = useState(null);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -16,6 +19,13 @@ const HeroSection = () => {
 
   const handleCancel = () => {
     setIsModalVisible(false);
+    setResultData(null);
+    setFileList([]);
+  };
+
+  const handleResultModalCancel = () => {
+    setIsResultModalVisible(false);
+    setResultData(null);
   };
 
   const handleUpload = () => {
@@ -37,12 +47,12 @@ const HeroSection = () => {
         })
         .then((data) => {
           setUploading(false);
-          console.log("Upload Result:", data);
-          alert(
-            `Detected as ${data.label} with ${
-              data.prediction * 100
-            }% confidence`
-          );
+          setIsModalVisible(false); // Close first modal
+          setResultData({
+            label: data.label,
+            confidence: data.prediction * 100,
+          });
+          setIsResultModalVisible(true); // Show result modal
         })
         .catch((error) => {
           setUploading(false);
@@ -62,12 +72,12 @@ const HeroSection = () => {
         })
         .then((data) => {
           setUploading(false);
-          console.log("Upload Result:", data);
-          alert(
-            `Detected as ${data.result} with ${
-              data.confidence * 100
-            }% confidence`
-          );
+          setIsModalVisible(false); // Close first modal
+          setResultData({
+            label: data.result,
+            confidence: data.confidence * 100,
+          });
+          setIsResultModalVisible(true); // Show result modal
         })
         .catch((error) => {
           setUploading(false);
@@ -76,16 +86,28 @@ const HeroSection = () => {
         });
     }
   };
+
+  const downloadPDF = () => {
+    if (!resultData) return;
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("DeepFake Detection Result", 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Label: ${resultData.label}`, 20, 40);
+    doc.text(`Confidence: ${resultData.confidence.toFixed(2)}%`, 20, 50);
+    doc.save("DeepFake-Detection-Result.pdf");
+  };
+
   const uploadProps = {
-    name: "image",
+    name: "file",
     multiple: false,
     listType: "picture",
     beforeUpload(file) {
       const isImage = file.type.startsWith("image/");
       const isVideo = file.type.startsWith("video/");
 
-      if (!isImage || isVideo) {
-        message.error(`${file.name} should either a video or an image file`);
+      if (!isImage && !isVideo) {
+        message.error(`${file.name} should be either a video or an image file`);
         return false;
       }
 
@@ -109,7 +131,7 @@ const HeroSection = () => {
         </p>
         <button
           className="border-2 rounded border-slate-200 cursor-pointer px-4 py-2 hover:bg-slate-200 text-[#515f7d]"
-          onClick={() => showModal()}
+          onClick={showModal}
         >
           Get Started
         </button>
@@ -148,6 +170,38 @@ const HeroSection = () => {
             >
               Analyze
             </Button>
+          )}
+        </Modal>
+
+        {/* Result Modal */}
+        <Modal
+          title="Detection Result"
+          open={isResultModalVisible}
+          onCancel={handleResultModalCancel}
+          footer={null}
+          centered
+          width={600}
+          style={{
+            textAlign: "center",
+            borderRadius: "8px",
+          }}
+        >
+          {resultData && (
+            <>
+              <p style={{ fontSize: "18px", fontWeight: "bold" }}>
+                Detected as: {resultData.label}
+              </p>
+              <p style={{ fontSize: "16px", color: "#888" }}>
+                Confidence: {resultData.confidence.toFixed(2)}%
+              </p>
+              <Button
+                type="primary"
+                onClick={downloadPDF}
+                style={{ marginTop: "20px" }}
+              >
+                Download PDF Text
+              </Button>
+            </>
           )}
         </Modal>
       </div>
