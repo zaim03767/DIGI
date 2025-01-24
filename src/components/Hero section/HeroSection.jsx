@@ -17,76 +17,97 @@ const HeroSection = () => {
   const handleCancel = () => {
     setIsModalVisible(false);
   };
+  
   const handleUpload = () => {
+    console.log("file is: ",fileList[0])
     if (fileList.length === 0) {
       console.error("Please upload a file first.");
       return;
     }
     setUploading(true);
+    
+    // Create FormData and explicitly log its contents
     const formData = new FormData();
-    formData.append("file", fileList[0]);
-    console.log("file", fileList[0]);
-    let apiEndpoint = "";
-    // Determine file type and set API endpoint
-    if (fileList[0].type.startsWith("image/")) {
-      console.log("It is an image");
-      apiEndpoint = "";
-    } else if (fileList[0].type.startsWith("video/")) {
-      console.log("It is a video");
-      apiEndpoint = "";
-    } else {
-      console.log("Invalid file type. Please upload an image or video.");
-      return;
-    }
-    fetch(apiEndpoint, {
-      method: "POST",
-      body: formData,
-      // headers: {
-      //   "content-type": "application/json",
-      // },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setUploading(false);
-        console.success("File uploaded successfully!");
+    
+    console.log("FormData contents:", {
+      image: formData.get("image"),
+      name: formData.get("image")?.name,
+      type: formData.get("image")?.type
+    });
+    
+    if(fileList[0].originFileObj.type.startsWith("video/"))
+      {
+      formData.append("video", fileList[0].originFileObj || fileList[0]);
+      fetch("http://127.0.0.1:5000/predict-video", {
+        method: "POST",
+        body: formData,
       })
-      .catch((error) => {
-        setUploading(false);
-        console.error("File upload failed.", error);
-      });
+        .then((response) => {
+          console.log("Response Status:", response.status);
+          return response.json();
+        })
+        .then((data) => {
+          setUploading(false);
+          console.log("Upload Result:", data);
+          alert(`Detected as ${data.label} with ${data.prediction * 100}% confidence`);
+        })
+        .catch((error) => {
+          setUploading(false);
+          console.error("Full Upload Error:", error);
+          alert("File upload failed. Please try again.");
+        });
+      }
+      if(fileList[0].originFileObj.type.startsWith("image/")){
+      formData.append("image", fileList[0].originFileObj || fileList[0]);
+      fetch("http://127.0.0.1:5000/predict-img", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => {
+          console.log("Response Status:", response.status);
+          return response.json();
+        })
+        .then((data) => {
+          setUploading(false);
+          console.log("Upload Result:", data);
+          alert(`Detected as ${data.result} with ${data.confidence * 100}% confidence`);
+        })
+        .catch((error) => {
+          setUploading(false);
+          console.error("Full Upload Error:", error);
+          alert("File upload failed. Please try again.");
+        });
+    }
   };
+  
   const MAX_FILE_SIZE = 2 * 1024 * 1024;
   const uploadProps = {
-    disabled: fileList.length > 0 ? true : false,
-    name: "file",
+    name: "image",
     multiple: false,
-    action: "",
     listType: "picture",
     beforeUpload(file) {
-      if (file.size > MAX_FILE_SIZE) {
-        console.log("File is too large! Maximum size is 10MB.");
-        return Upload.LIST_IGNORE;
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/')
+      // const isLt2M = file.size / 1024 / 1024 < 2;
+      
+      if (!isImage || isVideo) {
+        message.error(`${file.name} should either a video or an image file`);
+        return false;
       }
-      // console.log("file size!!!!!: ", file.size);
+      // if (!isLt2M) {
+      //   message.error('Image must be smaller than 2MB!');
+      //   return false;
+      // }
+      
       return true;
     },
     onChange(info) {
-      const { file, fileList: updatedFileList } = info;
-      console.log("type: ", file);
-      const { status } = file;
-      if (status === "done") {
-        setFileList([...updatedFileList]);
-      } else if (status === "error") {
-        console.log(`${file.name} file upload failed.`);
-      }
+      let fileList = [...info.fileList];
+      fileList = fileList.slice(-1);
+      setFileList(fileList);
     },
-    onRemove(file) {
-      setFileList((prevFileList) =>
-        prevFileList.filter((item) => item.uid !== file.uid)
-      );
-    },
-    disabled: fileList.length >= 1,
   };
+  
 
   return (
     <div className="flex justify-between items-center gap-4 px-40 pt-24 pb-12">
