@@ -19,22 +19,12 @@ const HeroSection = () => {
   };
 
   const handleUpload = () => {
-    // console.log("file is: ", fileList[0]);
     if (fileList.length === 0) {
       console.error("Please upload a file first.");
       return;
     }
     setUploading(true);
-
-    // Create FormData and explicitly log its contents
     const formData = new FormData();
-
-    // console.log("FormData contents:", {
-    //   image: formData.get("image"),
-    //   name: formData.get("image")?.name,
-    //   type: formData.get("image")?.type,
-    // });
-
     if (fileList[0].originFileObj.type.startsWith("video/")) {
       formData.append("video", fileList[0].originFileObj || fileList[0]);
       fetch("http://127.0.0.1:5000/predict-video", {
@@ -93,16 +83,11 @@ const HeroSection = () => {
     beforeUpload(file) {
       const isImage = file.type.startsWith("image/");
       const isVideo = file.type.startsWith("video/");
-      // const isLt2M = file.size / 1024 / 1024 < 2;
 
       if (!isImage || isVideo) {
         message.error(`${file.name} should either a video or an image file`);
         return false;
       }
-      // if (!isLt2M) {
-      //   message.error('Image must be smaller than 2MB!');
-      //   return false;
-      // }
 
       return true;
     },
