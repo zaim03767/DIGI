@@ -16,7 +16,7 @@ const ExperimentalResults = () => {
         <ul className="text-[#515f7d] text-xl mb-2 pt-4 flex flex-col gap-2">
           <li className="flex items-center gap-2">
             <FaCheck size={15} color="#5777BA" />
-            Input Size: 128 x 128
+            Input Size: 299,299
           </li>
           <li className="flex items-center gap-2">
             <FaCheck size={15} color="#5777BA" />
@@ -28,7 +28,7 @@ const ExperimentalResults = () => {
           </li>
           <li className="flex items-center gap-2">
             <FaCheck size={15} color="#5777BA" />
-            Learning Rate: 0.0001
+            Learning Rate: 0.00001
           </li>
           <li className="flex items-center gap-2">
             <FaCheck size={15} color="#5777BA" />
@@ -40,10 +40,8 @@ const ExperimentalResults = () => {
           </li>
         </ul>
         <div className="images flex items-center gap-4 w-full pt-4">
-          {/* <img src="/Images/graph1.png" alt="Image" />
-          <img src="/Images/graph2.png" alt="Image" /> */}
-          <img src="/Images/1.jpg" alt="Image" className="w-1/2 h-72" />
-          <img src="/Images/2.jpg" alt="Image" className="w-1/2 h-72" />
+          <img src="/Images/graph1.jpeg" alt="Image" className="w-1/2 h-72" />
+          <img src="/Images/graph2.jpeg" alt="Image" className="w-1/2 h-72" />
         </div>
         <ul className="text-[#515f7d] text-xl mb-2 pt-4 flex flex-col gap-2">
           <li className="flex items-center gap-2">
@@ -60,8 +58,7 @@ const ExperimentalResults = () => {
           </li>
           <li className="flex items-center gap-2">
             <FaCheck size={15} color="#5777BA" />
-            We have achieved better results than XceptionNet and MesoNet based
-            on a{" "}
+            We have achieved better results with XceptionNet and LSTM based on a
             <a href="#" className="text-[#5777BA]">
               public deepfake detection benchmark
             </a>
