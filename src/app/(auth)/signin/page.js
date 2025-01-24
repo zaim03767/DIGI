@@ -67,19 +67,6 @@ const SignInPage = () => {
               required
             />
           </div>
-          <div className="flex flex-wrap -mx-4 mb-6 items-center justify-between">
-            <div className="w-full lg:w-auto px-4">
-              <a
-                className="inline-block font-extrabold hover:underline"
-                href="#"
-                onClick={() =>
-                  alert("Password recovery functionality coming soon!")
-                } // Add functionality later
-              >
-                Forgot your password?
-              </a>
-            </div>
-          </div>
           <button
             type="submit"
             className="inline-block w-full py-4 px-6 mb-6 text-center text-lg leading-6 text-white font-extrabold bg-indigo-800 hover:bg-indigo-900 border-3 border-indigo-900 shadow rounded transition duration-200"

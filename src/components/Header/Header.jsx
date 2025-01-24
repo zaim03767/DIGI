@@ -1,8 +1,10 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
+import Logout from "@/app/hooks/useLogout/useLogout";
 const Header = () => {
   const router = useRouter();
+  const logout = Logout();
   return (
     <header className="bg-white sticky top-0">
       <nav
@@ -36,9 +38,9 @@ const Header = () => {
           <a
             href="#"
             className="text-lg font-semibold text-gray-900"
-            onClick={() => router.push("/signin")}
+            onClick={() => logout()}
           >
-            Sign in <span aria-hidden="true">&rarr;</span>
+            Logout <span aria-hidden="true">&rarr;</span>
           </a>
         </div>
       </nav>
