@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { InboxOutlined } from "@ant-design/icons";
 import "@ant-design/v5-patch-for-react-19";
 import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const HeroSection = () => {
   const { Dragger } = Upload;
@@ -51,6 +52,7 @@ const HeroSection = () => {
           setResultData({
             label: data.label,
             confidence: data.prediction * 100,
+            fakeDetections: data.fake_detections,
           });
           setIsResultModalVisible(true); // Show result modal
         })
@@ -89,12 +91,33 @@ const HeroSection = () => {
 
   const downloadPDF = () => {
     if (!resultData) return;
+
     const doc = new jsPDF();
     doc.setFontSize(16);
     doc.text("DeepFake Detection Result", 20, 20);
     doc.setFontSize(12);
     doc.text(`Label: ${resultData.label}`, 20, 40);
     doc.text(`Confidence: ${resultData.confidence.toFixed(2)}%`, 20, 50);
+
+    if (resultData.fakeDetections && resultData.fakeDetections.length > 0) {
+      // Prepare table data
+      const tableData = resultData.fakeDetections.map((detection) => [
+        detection.frame_index,
+        `${(detection.prediction * 100).toFixed(2)}%`,
+      ]);
+
+      // Add table to PDF
+      doc.autoTable({
+        startY: 60,
+        head: [["Frame Index", "Prediction (%)"]],
+        body: tableData,
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [52, 152, 219] }, // Blue header
+        alternateRowStyles: { fillColor: [240, 240, 240] }, // Light grey rows
+      });
+    }
+
+    // Save the PDF
     doc.save("DeepFake-Detection-Result.pdf");
   };
 
@@ -194,6 +217,73 @@ const HeroSection = () => {
               <p style={{ fontSize: "16px", color: "#888" }}>
                 Confidence: {resultData.confidence.toFixed(2)}%
               </p>
+              {resultData.fakeDetections && (
+                <div
+                  style={{
+                    maxHeight: "300px",
+                    overflowY: "auto",
+                    marginTop: "15px",
+                  }}
+                >
+                  <table
+                    style={{
+                      width: "100%",
+                      borderCollapse: "collapse",
+                      border: "1px solid #ddd",
+                    }}
+                  >
+                    <thead>
+                      <tr
+                        style={{
+                          backgroundColor: "#f2f2f2",
+                          borderBottom: "2px solid #ddd",
+                        }}
+                      >
+                        <th
+                          style={{
+                            padding: "10px",
+                            textAlign: "left",
+                            borderRight: "1px solid #ddd",
+                          }}
+                        >
+                          Frame Index
+                        </th>
+                        <th style={{ padding: "10px", textAlign: "left" }}>
+                          Prediction
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {resultData.fakeDetections.map((detection, index) => (
+                        <tr
+                          key={index}
+                          style={{ borderBottom: "1px solid #ddd" }}
+                        >
+                          <td
+                            style={{
+                              padding: "10px",
+                              textAlign: "left",
+                              borderRight: "1px solid #ddd",
+                            }}
+                          >
+                            {detection.frame_index}
+                          </td>
+                          <td
+                            style={{
+                              padding: "10px",
+                              textAlign: "left",
+                              color: "red",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {(detection.prediction * 100).toFixed(2)}%
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
               <Button
                 type="primary"
                 onClick={downloadPDF}
